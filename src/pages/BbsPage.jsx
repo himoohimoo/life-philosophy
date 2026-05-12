@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getPosts, initBBSData, addPost, deletePost, likePost, getComments, addComment, deleteComment, updateComment, likeComment } from '../utils/bbsData';
+import { getPosts, initBBSData, addPost, deletePost, updatePost, likePost, getComments, addComment, deleteComment, updateComment, likeComment } from '../utils/bbsData';
 import { useUser } from '../contexts/UserContext';
 
 export default function BbsPage({ category, title, icon }) {
@@ -12,6 +12,8 @@ export default function BbsPage({ category, title, icon }) {
   const [editingComment, setEditingComment] = useState(null);
   const [commentContent, setCommentContent] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [editingPost, setEditingPost] = useState(null);
+  const [editPostData, setEditPostData] = useState({ title: '', content: '', tags: '', location: '', priceRange: '' });
   
   const { user } = useUser();
   const navigate = useNavigate();
@@ -63,6 +65,36 @@ export default function BbsPage({ category, title, icon }) {
     setExpandedPost(null);
   };
   
+  // 编辑帖子
+  const handleEditPost = (post) => {
+    setEditingPost(post);
+    setEditPostData({
+      title: post.title,
+      content: post.content,
+      tags: (post.tags || []).join(', '),
+      location: post.location || '',
+      priceRange: post.priceRange || ''
+    });
+  };
+  
+  // 保存编辑帖子
+  const handleSaveEditPost = () => {
+    if (!editPostData.title.trim() || !editPostData.content.trim()) {
+      alert('请填写标题和内容');
+      return;
+    }
+    updatePost(editingPost.id, {
+      title: editPostData.title,
+      content: editPostData.content,
+      tags: editPostData.tags.split(',').map(t => t.trim()).filter(Boolean),
+      location: editPostData.location,
+      priceRange: editPostData.priceRange
+    });
+    setEditingPost(null);
+    setEditPostData({ title: '', content: '', tags: '', location: '', priceRange: '' });
+    setPosts(getPosts(category));
+  };
+  
   // 点赞帖子
   const handleLikePost = (postId) => {
     likePost(postId);
@@ -75,16 +107,21 @@ export default function BbsPage({ category, title, icon }) {
       alert('请先登录');
       return;
     }
-    if (!newComment.trim()) return;
-    
     if (editingComment) {
+      if (!commentContent.trim()) return;
       updateComment(editingComment.id, commentContent);
       setEditingComment(null);
       setCommentContent('');
     } else {
+      if (!newComment.trim()) return;
       addComment(postId, newComment, user.username);
       setNewComment('');
     }
+    // 强制刷新评论和帖子列表
+    setPosts(getPosts(category));
+    // 触发重新渲染以刷新评论
+    setExpandedPost(postId);
+    setTimeout(() => setExpandedPost(postId), 50);
   };
   
   // 编辑评论
@@ -613,6 +650,11 @@ export default function BbsPage({ category, title, icon }) {
             {currentPost.location && <span>📍 {currentPost.location}</span>}
             {currentPost.priceRange && <span>💰 {currentPost.priceRange}</span>}
             <span>❤️ {currentPost.likes} 点赞</span>
+            {user && (user.username === currentPost.authorId || user.username === 'admin') && (
+              <button className="bbs-action-btn" onClick={() => handleEditPost(currentPost)} style={{marginLeft: 'auto'}}>
+                ✏️ 编辑帖子
+              </button>
+            )}
           </div>
           
           {/* 评论区域 */}
@@ -620,21 +662,16 @@ export default function BbsPage({ category, title, icon }) {
             <h4>💬 评论 ({comments.length})</h4>
             
             {/* 评论表单 */}
-            {user && (
+            {user && !editingComment && (
               <div className="bbs-comment-form">
                 <textarea
-                  placeholder={editingComment ? '修改评论...' : '发表评论...'}
-                  value={editingComment ? commentContent : newComment}
-                  onChange={(e) => editingComment ? setCommentContent(e.target.value) : setNewComment(e.target.value)}
+                  placeholder="发表评论..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
                 />
                 <button className="bbs-btn bbs-btn-primary" onClick={() => handleSubmitComment(expandedPost)}>
-                  {editingComment ? '保存' : '发送'}
+                  发送
                 </button>
-                {editingComment && (
-                  <button className="bbs-btn bbs-btn-secondary" onClick={() => {setEditingComment(null); setCommentContent('');}}>
-                    取消
-                  </button>
-                )}
               </div>
             )}
             
@@ -728,13 +765,21 @@ export default function BbsPage({ category, title, icon }) {
                     >
                       ❤️ {post.likes}
                     </button>
-                    {(user && (user.username === post.authorId || user.username === 'admin')) && (
-                      <button 
-                        className="bbs-action-btn bbs-btn-danger" 
-                        onClick={() => handleDeletePost(post.id)}
-                      >
-                        删除
-                      </button>
+                    {user && (user.username === post.authorId || user.username === 'admin') && (
+                      <>
+                        <button 
+                          className="bbs-action-btn" 
+                          onClick={() => handleEditPost(post)}
+                        >
+                          ✏️ 编辑
+                        </button>
+                        <button 
+                          className="bbs-action-btn bbs-btn-danger" 
+                          onClick={() => handleDeletePost(post.id)}
+                        >
+                          删除
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -748,6 +793,64 @@ export default function BbsPage({ category, title, icon }) {
               </div>
             ))
           )}
+        </div>
+      )}
+      
+      {/* 编辑帖子弹窗 */}
+      {editingPost && (
+        <div className="modal-overlay" onClick={() => setEditingPost(null)}>
+          <div className="modal-content" style={{maxWidth: '600px'}} onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setEditingPost(null)}>✕</button>
+            <h3 className="modal-title">✏️ 编辑帖子</h3>
+            <div className="bbs-form-group" style={{marginTop: '20px'}}>
+              <label>标题 *</label>
+              <input
+                type="text"
+                value={editPostData.title}
+                onChange={(e) => setEditPostData({...editPostData, title: e.target.value})}
+              />
+            </div>
+            <div className="bbs-form-group">
+              <label>内容 *</label>
+              <textarea
+                value={editPostData.content}
+                onChange={(e) => setEditPostData({...editPostData, content: e.target.value})}
+                style={{minHeight: '200px'}}
+              />
+            </div>
+            <div className="bbs-form-group">
+              <label>标签（用逗号分隔）</label>
+              <input
+                type="text"
+                value={editPostData.tags}
+                onChange={(e) => setEditPostData({...editPostData, tags: e.target.value})}
+              />
+            </div>
+            {category === 'food' && (
+              <>
+                <div className="bbs-form-group">
+                  <label>地址</label>
+                  <input
+                    type="text"
+                    value={editPostData.location}
+                    onChange={(e) => setEditPostData({...editPostData, location: e.target.value})}
+                  />
+                </div>
+                <div className="bbs-form-group">
+                  <label>人均消费</label>
+                  <input
+                    type="text"
+                    value={editPostData.priceRange}
+                    onChange={(e) => setEditPostData({...editPostData, priceRange: e.target.value})}
+                  />
+                </div>
+              </>
+            )}
+            <div className="bbs-form-actions">
+              <button className="bbs-btn bbs-btn-secondary" onClick={() => setEditingPost(null)}>取消</button>
+              <button className="bbs-btn bbs-btn-primary" onClick={handleSaveEditPost}>保存修改</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

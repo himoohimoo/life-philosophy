@@ -1,7 +1,7 @@
 // BBS帖子和评论数据管理
 // 使用 localStorage 存储，支持美食和玩乐两个板块
 
-const STORAGE_KEY = 'life_philosophy_bbs';
+const STORAGE_KEY = 'life_philosophy_bbs_v2';
 
 // 初始化默认数据
 const defaultPosts = {
@@ -9,8 +9,8 @@ const defaultPosts = {
     {
       id: 'food-1',
       title: '回民街必吃清单｜本地人带你吃最正宗的西安美食',
-      author: '西安土著',
-      authorId: 'system',
+      author: '版主',
+      authorId: 'moderator',
       content: `来西安玩的朋友必看！作为在回民街附近住了20年的西安人，给大家分享一些真正好吃的店：
 
 **泡馍类**
@@ -32,17 +32,17 @@ const defaultPosts = {
 - 网红店排队2小时不如隔壁本地店`,
       likes: 328,
       replies: 56,
-      time: '2024-01-15 10:30',
+      time: '2026-05-12 19:35',
       tags: ['回民街', '泡馍', '烤肉', '攻略'],
       location: '回民街（北院门）',
       priceRange: '人均30-80元',
-      createdAt: Date.now() - 86400000 * 30
+      createdAt: Date.now()
     },
     {
       id: 'food-2',
       title: '永兴坊Vs回民街｜哪个更值得去？',
-      author: '吃货小分队',
-      authorId: 'system',
+      author: '版主',
+      authorId: 'moderator',
       content: `很多朋友问永兴坊和回民街该怎么选，我来说说我的看法：
 
 **永兴坊**
@@ -74,17 +74,17 @@ const defaultPosts = {
 两者都要 → 永兴坊白天，回民街晚上`,
       likes: 215,
       replies: 43,
-      time: '2024-01-10 15:20',
+      time: '2026-05-12 19:35',
       tags: ['永兴坊', '对比', '攻略'],
       location: '永兴坊',
       priceRange: '人均50-100元',
-      createdAt: Date.now() - 86400000 * 25
+      createdAt: Date.now()
     },
     {
       id: 'food-3',
       title: '藏在巷子里的神仙面馆｜只有本地人才知道',
-      author: '面食爱好者',
-      authorId: 'system',
+      author: '版主',
+      authorId: 'moderator',
       content: `西安的面食真的绝了！今天推荐几家藏在巷子里的小店：
 
 **1. 爱骅裤带面馆**
@@ -110,17 +110,17 @@ const defaultPosts = {
 小提示：西安的面馆普遍分量很大，男孩子一碗就够了，女孩子可以要小碗或者两人一碗～`,
       likes: 189,
       replies: 32,
-      time: '2024-01-08 09:15',
+      time: '2026-05-12 19:35',
       tags: ['面食', '隐藏美食', '性价比'],
       location: '多个地点',
       priceRange: '人均12-20元',
-      createdAt: Date.now() - 86400000 * 20
+      createdAt: Date.now()
     },
     {
       id: 'food-4',
       title: '小南门早市｜体验最地道的西安烟火气',
-      author: '早起困难户',
-      authorId: 'system',
+      author: '版主',
+      authorId: 'moderator',
       content: `谁说来西安只能吃回民街？小南门早市才是本地人的天堂！
 
 **什么是小南门早市？**
@@ -145,19 +145,19 @@ const defaultPosts = {
 3. 可以带个布袋子买菜，新鲜又便宜`,
       likes: 276,
       replies: 48,
-      time: '2024-01-05 08:00',
+      time: '2026-05-12 19:35',
       tags: ['早市', '烟火气', '本地人'],
       location: '小南门早市',
       priceRange: '人均15-30元',
-      createdAt: Date.now() - 86400000 * 15
+      createdAt: Date.now()
     }
   ],
   play: [
     {
       id: 'play-1',
       title: '西安3日游精华路线｜教科书级别的攻略',
-      author: '旅行规划师',
-      authorId: 'system',
+      author: '版主',
+      authorId: 'moderator',
       content: `作为一个在西安读了4年大学的过来人，给大家整理了一条经典的3日游路线：
 
 **Day 1 - 历史穿越**
@@ -187,18 +187,18 @@ const defaultPosts = {
 4. 兵马俑建议报一日游，省心`,
       likes: 456,
       replies: 89,
-      time: '2024-01-12 14:00',
+      time: '2026-05-12 19:35',
       tags: ['3日游', '经典路线', '攻略'],
       route: '古迹研学线',
       estimatedTime: '3天',
       bestSeason: '春秋',
-      createdAt: Date.now() - 86400000 * 28
+      createdAt: Date.now()
     },
     {
       id: 'play-2',
       title: '华山一日游｜去之前一定要看这篇！',
-      author: '户外爱好者',
-      authorId: 'system',
+      author: '版主',
+      authorId: 'moderator',
       content: `"奇险天下第一山"名不虚传！但去华山之前，这些你必须知道：
 
 **关于路线选择**：
@@ -239,18 +239,18 @@ const defaultPosts = {
 - 山顶物价是山下的3倍`,
       likes: 312,
       replies: 67,
-      time: '2024-01-09 11:30',
+      time: '2026-05-12 19:35',
       tags: ['华山', '一日游', '徒步'],
       route: '自然探险线',
       estimatedTime: '1天',
       bestSeason: '4-10月',
-      createdAt: Date.now() - 86400000 * 22
+      createdAt: Date.now()
     },
     {
       id: 'play-3',
       title: '法门寺深度游｜佛骨舍利瞻仰攻略',
-      author: '禅意行者',
-      authorId: 'system',
+      author: '版主',
+      authorId: 'moderator',
       content: `法门寺，因供奉佛指舍利而闻名于世。这是我去过最震撼的地方之一。
 
 **关于佛指舍利**：
@@ -287,18 +287,18 @@ const defaultPosts = {
 💡 小提示：初一十五人超多，建议避开`,
       likes: 234,
       replies: 45,
-      time: '2024-01-07 16:45',
+      time: '2026-05-12 19:35',
       tags: ['法门寺', '佛教', '寺庙'],
       route: '佛教文化线',
       estimatedTime: '1天',
       bestSeason: '全年',
-      createdAt: Date.now() - 86400000 * 18
+      createdAt: Date.now()
     },
     {
       id: 'play-4',
       title: '西安骑行路线推荐｜用脚踏遍这座城',
-      author: '骑行达人',
-      authorId: 'system',
+      author: '版主',
+      authorId: 'moderator',
       content: `在西安骑行了5年，给大家推荐几条经典的骑行路线：
 
 **🌟 环城公园骑行（入门级）**
@@ -343,12 +343,12 @@ const defaultPosts = {
 4. 秦岭路线最好结伴`,
       likes: 187,
       replies: 38,
-      time: '2024-01-04 13:20',
+      time: '2026-05-12 19:35',
       tags: ['骑行', '环城公园', '秦岭'],
       route: '骑行休闲线',
       estimatedTime: '2-10小时',
       bestSeason: '春秋',
-      createdAt: Date.now() - 86400000 * 12
+      createdAt: Date.now()
     }
   ]
 };
@@ -359,46 +359,46 @@ const defaultComments = {
     {
       id: 'c1',
       postId: 'food-1',
-      author: '游客小王',
-      authorId: 'user_001',
+      author: '版主',
+      authorId: 'moderator',
       content: '亲测老孙家泡馍确实正宗！就是掰膜掰到手酸😂',
-      time: '2024-01-16 10:00',
+      time: '2026-05-12 19:35',
       likes: 12,
-      createdAt: Date.now() - 86400000 * 28
+      createdAt: Date.now()
     },
     {
       id: 'c2',
       postId: 'food-1',
-      author: '本地人老李',
-      authorId: 'user_002',
+      author: '版主',
+      authorId: 'moderator',
       content: '补充一下：一真楼下午4点就关门了，想去的注意时间',
-      time: '2024-01-16 15:30',
+      time: '2026-05-12 19:35',
       likes: 8,
-      createdAt: Date.now() - 86400000 * 27
+      createdAt: Date.now()
     }
   ],
   'food-2': [
     {
       id: 'c3',
       postId: 'food-2',
-      author: '第一次来西安',
-      authorId: 'user_003',
+      author: '版主',
+      authorId: 'moderator',
       content: '太有用了！我周五到，就按这个安排～',
-      time: '2024-01-11 09:00',
+      time: '2026-05-12 19:35',
       likes: 5,
-      createdAt: Date.now() - 86400000 * 24
+      createdAt: Date.now()
     }
   ],
   'play-1': [
     {
       id: 'c4',
       postId: 'play-1',
-      author: '计划2月去',
-      authorId: 'user_004',
+      author: '版主',
+      authorId: 'moderator',
       content: '长恨歌演出在哪里买票？需要提前多久订？',
-      time: '2024-01-13 11:00',
+      time: '2026-05-12 19:35',
       likes: 3,
-      createdAt: Date.now() - 86400000 * 26
+      createdAt: Date.now()
     }
   ]
 };
@@ -427,11 +427,9 @@ function saveAllData(data) {
 
 // 初始化数据
 export function initBBSData() {
-  const currentData = getAllData();
-  if (!currentData.posts) {
-    saveAllData({ posts: defaultPosts, comments: defaultComments || {} });
-  }
-  return getAllData();
+  const data = { posts: defaultPosts, comments: defaultComments || {} };
+  saveAllData(data);
+  return data;
 }
 
 // 获取指定板块的帖子
