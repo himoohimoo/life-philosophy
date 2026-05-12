@@ -6,14 +6,14 @@ import { useUser } from '../contexts/UserContext';
 export default function BbsPage({ category, title, icon }) {
   const [posts, setPosts] = useState([]);
   const [showNewPost, setShowNewPost] = useState(false);
-  const [newPost, setNewPost] = useState({ title: '', content: '', tags: '', location: '', priceRange: '' });
+  const [newPost, setNewPost] = useState({ title: '', content: '', tags: '', location: '', priceRange: '', images: [] });
   const [expandedPost, setExpandedPost] = useState(null);
   const [newComment, setNewComment] = useState('');
   const [editingComment, setEditingComment] = useState(null);
   const [commentContent, setCommentContent] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [editingPost, setEditingPost] = useState(null);
-  const [editPostData, setEditPostData] = useState({ title: '', content: '', tags: '', location: '', priceRange: '' });
+  const [editPostData, setEditPostData] = useState({ title: '', content: '', tags: '', location: '', priceRange: '', images: [] });
   
   const { user } = useUser();
   const navigate = useNavigate();
@@ -32,6 +32,54 @@ export default function BbsPage({ category, title, icon }) {
       )
     : posts;
   
+  // 图片上传处理（转为base64存储）
+  const handleImageUpload = (e, target) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    const oversized = files.find(f => f.size > maxSize);
+    if (oversized) {
+      alert('图片大小不能超过2MB');
+      return;
+    }
+    
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const imageData = ev.target.result;
+        if (target === 'new') {
+          setNewPost(prev => ({
+            ...prev,
+            images: [...prev.images, imageData]
+          }));
+        } else {
+          setEditPostData(prev => ({
+            ...prev,
+            images: [...prev.images, imageData]
+          }));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
+  
+  // 删除图片
+  const handleRemoveImage = (index, target) => {
+    if (target === 'new') {
+      setNewPost(prev => ({
+        ...prev,
+        images: prev.images.filter((_, i) => i !== index)
+      }));
+    } else {
+      setEditPostData(prev => ({
+        ...prev,
+        images: prev.images.filter((_, i) => i !== index)
+      }));
+    }
+  };
+  
   // 创建新帖子
   const handleCreatePost = () => {
     if (!user) {
@@ -48,12 +96,13 @@ export default function BbsPage({ category, title, icon }) {
       content: newPost.content,
       tags: newPost.tags.split(',').map(t => t.trim()).filter(Boolean),
       location: newPost.location,
-      priceRange: newPost.priceRange
+      priceRange: newPost.priceRange,
+      images: newPost.images
     }, user.username);
     
     setPosts(getPosts(category));
     setShowNewPost(false);
-    setNewPost({ title: '', content: '', tags: '', location: '', priceRange: '' });
+    setNewPost({ title: '', content: '', tags: '', location: '', priceRange: '', images: [] });
     setExpandedPost(post.id);
   };
   
@@ -73,7 +122,8 @@ export default function BbsPage({ category, title, icon }) {
       content: post.content,
       tags: (post.tags || []).join(', '),
       location: post.location || '',
-      priceRange: post.priceRange || ''
+      priceRange: post.priceRange || '',
+      images: post.images || []
     });
   };
   
@@ -88,10 +138,11 @@ export default function BbsPage({ category, title, icon }) {
       content: editPostData.content,
       tags: editPostData.tags.split(',').map(t => t.trim()).filter(Boolean),
       location: editPostData.location,
-      priceRange: editPostData.priceRange
+      priceRange: editPostData.priceRange,
+      images: editPostData.images
     });
     setEditingPost(null);
-    setEditPostData({ title: '', content: '', tags: '', location: '', priceRange: '' });
+    setEditPostData({ title: '', content: '', tags: '', location: '', priceRange: '', images: [] });
     setPosts(getPosts(category));
   };
   
@@ -540,6 +591,116 @@ export default function BbsPage({ category, title, icon }) {
           font-size: 48px;
           margin-bottom: 16px;
         }
+        
+        /* 图片上传样式 */
+        .bbs-image-upload-area {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        
+        .bbs-image-upload-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 10px 20px;
+          border: 2px dashed #2d3748;
+          border-radius: 8px;
+          color: #8892b0;
+          cursor: pointer;
+          font-size: 14px;
+          transition: all 0.2s;
+        }
+        
+        .bbs-image-upload-btn:hover {
+          border-color: #6366f1;
+          color: #a5b4fc;
+          background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .bbs-image-upload-btn:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+        
+        .bbs-image-hint {
+          color: #8892b0;
+          font-size: 13px;
+        }
+        
+        .bbs-image-preview-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-top: 12px;
+        }
+        
+        .bbs-image-preview-item {
+          position: relative;
+          width: 100px;
+          height: 100px;
+          border-radius: 8px;
+          overflow: hidden;
+          border: 1px solid #2d3748;
+        }
+        
+        .bbs-image-preview-item img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        
+        .bbs-image-remove {
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          border: none;
+          background: rgba(220, 38, 38, 0.9);
+          color: #fff;
+          font-size: 12px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          line-height: 1;
+        }
+        
+        .bbs-image-remove:hover {
+          background: #dc2626;
+        }
+        
+        /* 帖子详情图片展示 */
+        .bbs-post-images {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-bottom: 20px;
+        }
+        
+        .bbs-post-image {
+          width: 180px;
+          height: 180px;
+          border-radius: 10px;
+          overflow: hidden;
+          border: 1px solid #2d3748;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .bbs-post-image:hover {
+          border-color: #6366f1;
+          transform: scale(1.03);
+        }
+        
+        .bbs-post-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
       `}</style>
       
       {/* 头部 */}
@@ -559,7 +720,12 @@ export default function BbsPage({ category, title, icon }) {
         />
         {user && (
           <button className="bbs-btn bbs-btn-primary" onClick={() => setShowNewPost(!showNewPost)}>
-            {showNewPost ? '取消发布' : '发布新帖'}
+            {showNewPost ? '取消发布' : '📝 发布新帖'}
+          </button>
+        )}
+        {!user && (
+          <button className="bbs-btn bbs-btn-primary" onClick={() => alert('请先登录后再发布帖子')}>
+            📝 发布新帖
           </button>
         )}
       </div>
@@ -593,6 +759,34 @@ export default function BbsPage({ category, title, icon }) {
               value={newPost.tags}
               onChange={(e) => setNewPost({...newPost, tags: e.target.value})}
             />
+          </div>
+          {/* 图片上传 */}
+          <div className="bbs-form-group">
+            <label>📷 添加图片（最多9张，每张不超过2MB）</label>
+            <div className="bbs-image-upload-area">
+              <label className="bbs-image-upload-btn">
+                + 选择图片
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  style={{display: 'none'}}
+                  onChange={(e) => handleImageUpload(e, 'new')}
+                  disabled={newPost.images.length >= 9}
+                />
+              </label>
+              <span className="bbs-image-hint">{newPost.images.length}/9</span>
+            </div>
+            {newPost.images.length > 0 && (
+              <div className="bbs-image-preview-list">
+                {newPost.images.map((img, i) => (
+                  <div key={i} className="bbs-image-preview-item">
+                    <img src={img} alt="预览" />
+                    <button className="bbs-image-remove" onClick={() => handleRemoveImage(i, 'new')}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           {category === 'food' && (
             <>
@@ -644,6 +838,16 @@ export default function BbsPage({ category, title, icon }) {
             </div>
           </div>
           <div className="bbs-post-detail-content">{currentPost.content}</div>
+          {/* 图片展示 */}
+          {currentPost.images && currentPost.images.length > 0 && (
+            <div className="bbs-post-images">
+              {currentPost.images.map((img, i) => (
+                <div key={i} className="bbs-post-image" onClick={() => window.open(img, '_blank')}>
+                  <img src={img} alt="帖子图片" />
+                </div>
+              ))}
+            </div>
+          )}
           <div className="bbs-post-info">
             <span>👤 {currentPost.author}</span>
             <span>🕐 {currentPost.time}</span>
@@ -787,6 +991,7 @@ export default function BbsPage({ category, title, icon }) {
                   <span>👤 {post.author}</span>
                   <span>🕐 {post.time}</span>
                   <span>💬 {post.replies} 评论</span>
+                  {post.images && post.images.length > 0 && <span>📷 {post.images.length}图</span>}
                   {post.location && <span>📍 {post.location}</span>}
                   {post.priceRange && <span>💰 {post.priceRange}</span>}
                 </div>
@@ -825,6 +1030,34 @@ export default function BbsPage({ category, title, icon }) {
                 value={editPostData.tags}
                 onChange={(e) => setEditPostData({...editPostData, tags: e.target.value})}
               />
+            </div>
+            {/* 编辑图片 */}
+            <div className="bbs-form-group">
+              <label>📷 图片（最多9张，每张不超过2MB）</label>
+              <div className="bbs-image-upload-area">
+                <label className="bbs-image-upload-btn">
+                  + 添加图片
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    style={{display: 'none'}}
+                    onChange={(e) => handleImageUpload(e, 'edit')}
+                    disabled={editPostData.images.length >= 9}
+                  />
+                </label>
+                <span className="bbs-image-hint">{editPostData.images.length}/9</span>
+              </div>
+              {editPostData.images.length > 0 && (
+                <div className="bbs-image-preview-list">
+                  {editPostData.images.map((img, i) => (
+                    <div key={i} className="bbs-image-preview-item">
+                      <img src={img} alt="预览" />
+                      <button className="bbs-image-remove" onClick={() => handleRemoveImage(i, 'edit')}>✕</button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             {category === 'food' && (
               <>
