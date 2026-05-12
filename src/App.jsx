@@ -1,0 +1,103 @@
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { UserProvider } from './contexts/UserContext';
+import CosmicBackground from './components/CosmicBackground';
+import HomePage from './pages/HomePage';
+import CategoryPage from './pages/CategoryPage';
+import DetailPage from './pages/DetailPage';
+import MbtiTestPage from './pages/MbtiTestPage';
+import MbtiHistoryPage from './pages/MbtiHistoryPage';
+import AdminDashboard from './pages/AdminDashboard';
+import BaziPage from './pages/BaziPage';
+import { siteData } from './data/siteData';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
+function App() {
+  return (
+    <UserProvider>
+      <CosmicBackground />
+      <ScrollToTop />
+      <main className="main-content">
+        <Routes>
+          {/* 首页 - 终极三问 */}
+          <Route
+            path="/"
+            element={<HomePage data={siteData.home} />}
+          />
+
+          {/* 第二级 - 我是谁 */}
+          <Route
+            path="/whoami"
+            element={
+              <CategoryPage
+                data={siteData.whoami}
+                parentData={{ id: 'whoami' }}
+              />
+            }
+          />
+
+          {/* 第二级 - 我从哪里来 */}
+          <Route
+            path="/wherefrom"
+            element={
+              <CategoryPage
+                data={siteData.wherefrom}
+                parentData={{ id: 'wherefrom' }}
+              />
+            }
+          />
+
+          {/* 第二级 - 我要到哪里去 */}
+          <Route
+            path="/whereto"
+            element={
+              <CategoryPage
+                data={siteData.whereto}
+                parentData={{ id: 'whereto' }}
+              />
+            }
+          />
+
+          {/* MBTI 性格测试 */}
+          <Route
+            path="/whoami/mbti-test"
+            element={<MbtiTestPage />}
+          />
+
+          {/* MBTI 测试历史记录 */}
+          <Route
+            path="/whoami/mbti-history"
+            element={<MbtiHistoryPage />}
+          />
+
+          {/* 八字分析 */}
+          <Route
+            path="/whoami/bazi-analyze"
+            element={<BaziPage />}
+          />
+
+          {/* 管理员面板 */}
+          <Route
+            path="/admin"
+            element={<AdminDashboard />}
+          />
+
+          {/* 第三级 - 各子分类详情页 */}
+          <Route
+            path="/:categoryId/:topicId"
+            element={<DetailPage siteData={siteData} />}
+          />
+        </Routes>
+      </main>
+    </UserProvider>
+  );
+}
+
+export default App;
