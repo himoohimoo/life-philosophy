@@ -9,6 +9,7 @@ import MbtiTestPage from './pages/MbtiTestPage';
 import MbtiHistoryPage from './pages/MbtiHistoryPage';
 import AdminDashboard from './pages/AdminDashboard';
 import BaziPage from './pages/BaziPage';
+import BbsPage from './pages/BbsPage';
 import { siteData } from './data/siteData';
 
 function ScrollToTop() {
@@ -81,6 +82,18 @@ function App() {
           <Route
             path="/whoami/bazi-analyze"
             element={<BaziPage />}
+          />
+
+          {/* 美食BBS */}
+          <Route
+            path="/whereto/food"
+            element={<BbsPage category="food" title="西安美食" icon="🍜" />}
+          />
+
+          {/* 玩乐BBS */}
+          <Route
+            path="/whereto/play"
+            element={<BbsPage category="play" title="西安玩乐" icon="🎯" />}
           />
 
           {/* 管理员面板 */}

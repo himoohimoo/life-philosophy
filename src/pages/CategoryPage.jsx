@@ -2,6 +2,11 @@ import { Link } from 'react-router-dom';
 import Breadcrumb from '../components/Breadcrumb';
 
 function CategoryPage({ data, parentData }) {
+  // 获取卡片链接
+  const getCardLink = (cat) => {
+    return cat.route || `/${parentData.id}/${cat.id}`;
+  };
+  
   return (
     <div className="page-enter">
       <div className="page-container">
@@ -22,7 +27,7 @@ function CategoryPage({ data, parentData }) {
         <div className="sub-nav">
           {data.categories.map((cat) => (
             <Link
-              to={`/${parentData.id}/${cat.id}`}
+              to={getCardLink(cat)}
               key={cat.id}
               className="sub-nav-link"
             >
@@ -35,7 +40,7 @@ function CategoryPage({ data, parentData }) {
         <div className="card-grid">
           {data.categories.map((cat) => (
             <Link
-              to={`/${parentData.id}/${cat.id}`}
+              to={getCardLink(cat)}
               key={cat.id}
               className="glass-card"
             >
