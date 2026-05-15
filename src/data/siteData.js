@@ -64,7 +64,8 @@ export const siteData = {
         id: 'face',
         title: '我的面相',
         icon: '👤',
-        desc: '面相学认为，一个人的面部特征反映着其内在的性格和命运。从五官到脸型，从气色到纹路，每一处细节都可能隐藏着关于"我"的信息。',
+        route: '/whoami/face-analyze',
+        desc: '上传一张五官清晰的照片，基于易经五行理论，AI智能分析你的面相特征，解读五官运势。',
         detail: {
           title: '面相学 · 以面观心',
           sections: [
@@ -110,7 +111,8 @@ export const siteData = {
         id: 'zodiac',
         title: '我的星座',
         icon: '⭐',
-        desc: '从古巴比伦到现代社交媒体，星座文化跨越了数千年的时空。无论你是坚定的星座爱好者还是理性的怀疑论者，星座都为我们提供了一种有趣的自我认知框架。',
+        route: '/whoami/zodiac-analyze',
+        desc: '输入你的出生日期，获取专属星座分析。基于星座文化，解读你的性格特点、运势走向和人生建议。',
         detail: {
           title: '星座 · 星空下的自我',
           sections: [

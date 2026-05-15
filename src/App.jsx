@@ -10,6 +10,8 @@ import MbtiHistoryPage from './pages/MbtiHistoryPage';
 import AdminDashboard from './pages/AdminDashboard';
 import BaziPage from './pages/BaziPage';
 import BbsPage from './pages/BbsPage';
+import FacePage from './pages/FacePage';
+import ZodiacPage from './pages/ZodiacPage';
 import { siteData } from './data/siteData';
 
 function ScrollToTop() {
@@ -82,6 +84,18 @@ function App() {
           <Route
             path="/whoami/bazi-analyze"
             element={<BaziPage />}
+          />
+
+          {/* 面相分析 */}
+          <Route
+            path="/whoami/face-analyze"
+            element={<FacePage />}
+          />
+
+          {/* 星座分析 */}
+          <Route
+            path="/whoami/zodiac-analyze"
+            element={<ZodiacPage />}
           />
 
           {/* 美食BBS */}
