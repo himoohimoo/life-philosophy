@@ -12,6 +12,7 @@ import BaziPage from './pages/BaziPage';
 import BbsPage from './pages/BbsPage';
 import FacePage from './pages/FacePage';
 import ZodiacPage from './pages/ZodiacPage';
+import PssPage from './pages/PssPage';
 import { siteData } from './data/siteData';
 
 function ScrollToTop() {
@@ -96,6 +97,12 @@ function App() {
           <Route
             path="/whoami/zodiac-analyze"
             element={<ZodiacPage />}
+          />
+
+          {/* 压力测试 */}
+          <Route
+            path="/whoami/stress-test"
+            element={<PssPage />}
           />
 
           {/* 美食BBS */}
