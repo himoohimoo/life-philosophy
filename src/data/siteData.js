@@ -285,7 +285,8 @@ export const siteData = {
         id: 'dna',
         title: 'DNA的秘密',
         icon: '🧬',
-        desc: 'DNA是生命的蓝图，承载着从远古祖先到现代人类的全部遗传信息。你的每一个细胞中，都藏着数百万年进化的故事。探索基因的奥秘，了解你与祖先的连接。',
+        route: '/wherefrom/dna-quiz',
+        desc: 'DNA是生命的蓝图，承载着从远古祖先到现代人类的全部遗传信息。探索基因的奥秘，参与趣味问答，测测你的基因智商。',
         detail: {
           title: 'DNA · 生命的密码',
           sections: [

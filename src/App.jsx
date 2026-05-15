@@ -15,6 +15,7 @@ import ZodiacPage from './pages/ZodiacPage';
 import PssPage from './pages/PssPage';
 import LovePage from './pages/LovePage';
 import FirePage from './pages/FirePage';
+import DnaQuizPage from './pages/DnaQuizPage';
 import { siteData } from './data/siteData';
 
 function ScrollToTop() {
@@ -111,6 +112,12 @@ function App() {
           <Route
             path="/whoami/love-test"
             element={<LovePage />}
+          />
+
+          {/* DNA趣味问答 */}
+          <Route
+            path="/wherefrom/dna-quiz"
+            element={<DnaQuizPage />}
           />
 
           {/* 退休生活FIRE */}
