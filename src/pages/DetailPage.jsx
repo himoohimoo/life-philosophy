@@ -124,6 +124,7 @@ function DetailPage({ siteData }) {
                           __html: line
                             .replace(/【(.+?)】/g, '<strong style="color: var(--accent-cyan);">$1</strong>')
                             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #818cf8; text-decoration: underline;">$1</a>')
                         }} />
                       ))}
                     </ul>
@@ -137,6 +138,7 @@ function DetailPage({ siteData }) {
                     __html: paragraph
                       .replace(/【(.+?)】/g, '<strong style="color: var(--accent-cyan);">$1</strong>')
                       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #818cf8; text-decoration: underline;">$1</a>')
                   }} />
                 );
               })}
