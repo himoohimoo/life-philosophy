@@ -14,6 +14,7 @@ import FacePage from './pages/FacePage';
 import ZodiacPage from './pages/ZodiacPage';
 import PssPage from './pages/PssPage';
 import LovePage from './pages/LovePage';
+import FirePage from './pages/FirePage';
 import { siteData } from './data/siteData';
 
 function ScrollToTop() {
@@ -110,6 +111,12 @@ function App() {
           <Route
             path="/whoami/love-test"
             element={<LovePage />}
+          />
+
+          {/* 退休生活FIRE */}
+          <Route
+            path="/whereto/retire-life"
+            element={<FirePage />}
           />
 
           {/* 美食BBS */}

@@ -456,7 +456,8 @@ export const siteData = {
         id: 'retire',
         title: '退休生活',
         icon: '🎉',
-        desc: '退休不是终点，而是人生的新起点。在这里，我们探讨如何规划退休生活、保持身心健康、继续创造价值，让晚年生活同样精彩。',
+        route: '/whereto/retire-life',
+        desc: '退休不是终点，而是人生的新起点。基于FIRE运动理念，探索提前退休后的理想生活分配，让每一天都充满意义。',
         detail: {
           title: '退休生活 · 开启人生新篇章',
           sections: [
