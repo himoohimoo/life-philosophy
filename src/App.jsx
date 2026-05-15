@@ -13,6 +13,7 @@ import BbsPage from './pages/BbsPage';
 import FacePage from './pages/FacePage';
 import ZodiacPage from './pages/ZodiacPage';
 import PssPage from './pages/PssPage';
+import LovePage from './pages/LovePage';
 import { siteData } from './data/siteData';
 
 function ScrollToTop() {
@@ -103,6 +104,12 @@ function App() {
           <Route
             path="/whoami/stress-test"
             element={<PssPage />}
+          />
+
+          {/* 择偶观测评 */}
+          <Route
+            path="/whoami/love-test"
+            element={<LovePage />}
           />
 
           {/* 美食BBS */}
