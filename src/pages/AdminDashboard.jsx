@@ -1,261 +1,326 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useUser } from '../contexts/UserContext';
-import { isAdmin, getAllUsersStats, getAllTestRecords, getGlobalStats } from '../utils/auth';
-import { mbtiTypes } from '../data/mbtiData';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getStatsSummary, getRecentVisitors } from '../data/visitorStats';
+import { getFeedbackCount } from '../data/feedbackStorage';
 
-function AdminDashboard() {
-  const { user } = useUser();
-  const [activeTab, setActiveTab] = useState('overview'); // overview | users | records
-  const [globalStats, setGlobalStats] = useState(null);
-  const [usersStats, setUsersStats] = useState([]);
-  const [allRecords, setAllRecords] = useState([]);
+const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    uniqueVisitors: 0,
+    totalVisits: 0,
+    todayVisits: 0,
+    weekVisits: 0,
+    feedbackCount: 0,
+    recentVisitors: []
+  });
 
+  // 加载统计数据
   useEffect(() => {
-    if (isAdmin(user)) {
-      refreshData();
-    }
-  }, [user]);
+    loadStats();
+  }, []);
 
-  const refreshData = () => {
-    setGlobalStats(getGlobalStats());
-    setUsersStats(getAllUsersStats());
-    setAllRecords(getAllTestRecords());
+  const loadStats = () => {
+    const visitorStats = getStatsSummary();
+    const recentVisitors = getRecentVisitors(10);
+    const feedbackCount = getFeedbackCount();
+
+    // 模拟注册用户总数（实际应从用户系统获取）
+    const registeredUsers = parseInt(localStorage.getItem('registered_users_count') || '0');
+
+    setStats({
+      ...visitorStats,
+      registeredUsers,
+      feedbackCount,
+      recentVisitors
+    });
   };
 
-  // 非管理员禁止访问
-  if (!isAdmin(user)) {
-    return (
-      <div className="page-enter">
-        <div className="page-container" style={{ maxWidth: '500px', margin: '0 auto', textAlign: 'center' }}>
-          <span style={{ fontSize: '4rem' }}>🔒</span>
-          <h2 style={{ marginTop: '16px' }}>权限不足</h2>
-          <p style={{ color: 'var(--text-secondary)', margin: '12px 0 24px' }}>
-            仅管理员（admin）可访问此页面
-          </p>
-          <Link to="/" className="mbti-btn primary" style={{ textDecoration: 'none' }}>← 返回首页</Link>
-        </div>
-      </div>
-    );
-  }
+  // 格式化时间
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString('zh-CN', {
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // 导航到反馈页面
+  const goToFeedback = () => {
+    navigate('/admin/feedback');
+  };
+
+  // 返回首页
+  const goToHome = () => {
+    navigate('/');
+  };
 
   return (
-    <div className="page-enter">
-      <div className="page-container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-        <Breadcrumb />
+    <div style={styles.container}>
+      {/* 页面标题 */}
+      <div style={styles.header}>
+        <h1 style={styles.title}>管理员控制台</h1>
+        <p style={styles.subtitle}>网站数据统计与管理</p>
+      </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
-          <div>
-            <h1 className="page-title" style={{ textAlign: 'left', fontSize: '2rem', marginBottom: '4px' }}>
-              🛡️ 管理员面板
-            </h1>
-            <p style={{ color: 'var(--text-secondary)' }}>
-              管理员：<strong style={{ color: 'var(--accent-cyan)' }}>{user}</strong>
-            </p>
-          </div>
-          <button className="mbti-btn secondary" onClick={refreshData}>
-            🔄 刷新数据
-          </button>
+      {/* 统计卡片网格 */}
+      <div style={styles.statsGrid}>
+        <div style={{...styles.statCard, ...styles.statCardGradient1}}>
+          <div style={styles.statIcon}>👥</div>
+          <div style={styles.statValue}>{stats.registeredUsers || 0}</div>
+          <div style={styles.statLabel}>注册用户总数</div>
         </div>
 
-        {/* 标签切换 */}
-        <div className="admin-tabs">
-          <button
-            className={`admin-tab ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            📊 数据概览
-          </button>
-          <button
-            className={`admin-tab ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveTab('users')}
-          >
-            👥 用户统计
-          </button>
-          <button
-            className={`admin-tab ${activeTab === 'records' ? 'active' : ''}`}
-            onClick={() => setActiveTab('records')}
-          >
-            📋 全部记录
-          </button>
+        <div style={{...styles.statCard, ...styles.statCardGradient2}}>
+          <div style={styles.statIcon}>🌐</div>
+          <div style={styles.statValue}>{stats.uniqueVisitors}</div>
+          <div style={styles.statLabel}>独立访客数</div>
         </div>
 
-        {/* 概览 */}
-        {activeTab === 'overview' && globalStats && (
-          <div className="admin-overview">
-            <div className="stat-card">
-              <div className="stat-number">{globalStats.totalUsers}</div>
-              <div className="stat-label">注册用户</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number">{globalStats.totalTests}</div>
-              <div className="stat-label">总测试次数</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number">{globalStats.avgTestsPerUser}</div>
-              <div className="stat-label">人均测试</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number">{Object.keys(globalStats.typeDistribution).length}</div>
-              <div className="stat-label">覆盖类型</div>
-            </div>
+        <div style={{...styles.statCard, ...styles.statCardGradient3}}>
+          <div style={styles.statIcon}>📊</div>
+          <div style={styles.statValue}>{stats.totalVisits}</div>
+          <div style={styles.statLabel}>总访问次数</div>
+        </div>
 
-            {/* 类型分布 */}
-            <div className="admin-section">
-              <h2 className="admin-section-title">📊 MBTI 类型分布</h2>
-              {Object.keys(globalStats.typeDistribution).length === 0 ? (
-                <p className="admin-empty">暂无测试数据</p>
-              ) : (
-                <div className="type-distribution">
-                  {Object.entries(globalStats.typeDistribution)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([type, count]) => {
-                      const typeInfo = mbtiTypes[type];
-                      const pct = globalStats.totalTests > 0
-                        ? ((count / globalStats.totalTests) * 100).toFixed(1)
-                        : 0;
-                      return (
-                        <div key={type} className="type-bar-row">
-                          <div className="type-bar-label">
-                            <span className="type-badge" style={{ background: typeInfo?.color || '#666' }}>
-                              {type}
-                            </span>
-                            <span className="type-name">{typeInfo?.name || ''}</span>
-                          </div>
-                          <div className="type-bar-track">
-                            <div
-                              className="type-bar-fill"
-                              style={{
-                                width: `${pct}%`,
-                                background: typeInfo?.color || '#666',
-                              }}
-                            />
-                          </div>
-                          <div className="type-bar-value">
-                            {count}次 ({pct}%)
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              )}
+        <div style={{...styles.statCard, ...styles.statCardGradient4}}>
+          <div style={styles.statIcon}>💬</div>
+          <div style={styles.statValue}>{stats.feedbackCount}</div>
+          <div style={styles.statLabel}>反馈数量</div>
+        </div>
+      </div>
+
+      {/* 快捷入口 */}
+      <div style={styles.quickActions}>
+        <h3 style={styles.sectionTitle}>快捷入口</h3>
+        <div style={styles.actionButtons}>
+          <button style={styles.actionButton} onClick={goToFeedback}>
+            <span style={styles.actionIcon}>📨</span>
+            查看反馈
+          </button>
+          <button style={styles.actionButton} onClick={goToHome}>
+            <span style={styles.actionIcon}>🏠</span>
+            返回首页
+          </button>
+        </div>
+      </div>
+
+      {/* 最近访客列表 */}
+      <div style={styles.visitorsSection}>
+        <h3 style={styles.sectionTitle}>最近访客</h3>
+        <div style={styles.tableContainer}>
+          {stats.recentVisitors.length === 0 ? (
+            <div style={styles.emptyState}>
+              <p>暂无访客数据</p>
             </div>
-          </div>
-        )}
-
-        {/* 用户统计 */}
-        {activeTab === 'users' && (
-          <div className="admin-section">
-            <h2 className="admin-section-title">👥 用户测试统计</h2>
-            {usersStats.length === 0 ? (
-              <p className="admin-empty">暂无注册用户</p>
-            ) : (
-              <div className="admin-table-wrapper">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>用户名</th>
-                      <th>注册时间</th>
-                      <th>测试次数</th>
-                      <th>最近测试</th>
-                      <th>主要类型</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {usersStats.map(u => {
-                      const typeInfo = mbtiTypes[u.topType];
-                      return (
-                        <tr key={u.username}>
-                          <td>
-                            <span className="table-username">
-                              <span className="table-avatar">{u.username.charAt(0).toUpperCase()}</span>
-                              {u.username}
-                              {isAdmin(u.username) && <span className="admin-badge">管理员</span>}
-                            </span>
-                          </td>
-                          <td>{new Date(u.createdAt).toLocaleDateString('zh-CN')}</td>
-                          <td><strong style={{ color: 'var(--accent-cyan)' }}>{u.totalTests}</strong></td>
-                          <td>{u.lastTestAt ? new Date(u.lastTestAt).toLocaleString('zh-CN') : '—'}</td>
-                          <td>
-                            {u.topType ? (
-                              <span className="type-badge" style={{ background: typeInfo?.color || '#666' }}>
-                                {u.topType} · {typeInfo?.name || ''}
-                              </span>
-                            ) : '—'}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* 全部记录 */}
-        {activeTab === 'records' && (
-          <div className="admin-section">
-            <h2 className="admin-section-title">📋 全部测试记录</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '16px' }}>
-              共 {allRecords.length} 条记录
-            </p>
-            {allRecords.length === 0 ? (
-              <p className="admin-empty">暂无测试记录</p>
-            ) : (
-              <div className="admin-table-wrapper">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>用户</th>
-                      <th>MBTI类型</th>
-                      <th>测试时间</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {allRecords.slice(0, 100).map((r, i) => {
-                      const typeInfo = mbtiTypes[r.type];
-                      return (
-                        <tr key={r.id || i}>
-                          <td>
-                            <span className="table-username">
-                              <span className="table-avatar">{r.username.charAt(0).toUpperCase()}</span>
-                              {r.username}
-                            </span>
-                          </td>
-                          <td>
-                            <span className="type-badge" style={{ background: typeInfo?.color || '#666' }}>
-                              {r.type} · {typeInfo?.name || ''}
-                            </span>
-                          </td>
-                          <td>{new Date(r.savedAt).toLocaleString('zh-CN')}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-                {allRecords.length > 100 && (
-                  <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '12px', fontSize: '0.85rem' }}>
-                    仅显示最近100条记录
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+          ) : (
+            <table style={styles.table}>
+              <thead>
+                <tr style={styles.tableHeader}>
+                  <th style={styles.th}>IP地址</th>
+                  <th style={styles.th}>首次访问</th>
+                  <th style={styles.th}>最后访问</th>
+                  <th style={styles.th}>访问次数</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.recentVisitors.map((visitor, index) => (
+                  <tr key={visitor.ip} style={styles.tableRow}>
+                    <td style={styles.td}>
+                      <span style={styles.ipBadge}>{visitor.ip}</span>
+                    </td>
+                    <td style={styles.td}>
+                      <span style={styles.timeText}>{formatTime(visitor.firstVisit)}</span>
+                    </td>
+                    <td style={styles.td}>
+                      <span style={styles.timeText}>{formatTime(visitor.lastVisit)}</span>
+                    </td>
+                    <td style={styles.td}>
+                      <span style={styles.visitCount}>{visitor.visitCount}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   );
-}
+};
 
-function Breadcrumb() {
-  return (
-    <nav className="breadcrumb">
-      <Link to="/">🏠 首页</Link>
-      <span className="separator">›</span>
-      <span className="current">管理员面板</span>
-    </nav>
-  );
-}
+// 暗色宇宙主题样式
+const styles = {
+  container: {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)',
+    padding: '32px',
+    color: '#ffffff'
+  },
+  header: {
+    textAlign: 'center',
+    marginBottom: '40px'
+  },
+  title: {
+    fontSize: '36px',
+    fontWeight: '700',
+    margin: '0 0 8px 0',
+    background: 'linear-gradient(135deg, #e94560 0%, #8a2be2 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text'
+  },
+  subtitle: {
+    fontSize: '16px',
+    color: '#808080',
+    margin: 0
+  },
+  statsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+    gap: '24px',
+    marginBottom: '40px'
+  },
+  statCard: {
+    padding: '28px',
+    borderRadius: '16px',
+    textAlign: 'center',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    ':hover': {
+      transform: 'translateY(-4px)',
+      boxShadow: '0 8px 40px rgba(0, 0, 0, 0.4)'
+    }
+  },
+  statCardGradient1: {
+    background: 'linear-gradient(135deg, rgba(233, 69, 96, 0.2) 0%, rgba(138, 43, 226, 0.2) 100%)'
+  },
+  statCardGradient2: {
+    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%)'
+  },
+  statCardGradient3: {
+    background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)'
+  },
+  statCardGradient4: {
+    background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.2) 0%, rgba(249, 115, 22, 0.2) 100%)'
+  },
+  statIcon: {
+    fontSize: '36px',
+    marginBottom: '12px'
+  },
+  statValue: {
+    fontSize: '42px',
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: '8px',
+    textShadow: '0 2px 10px rgba(0, 0, 0, 0.3)'
+  },
+  statLabel: {
+    fontSize: '14px',
+    color: '#a0a0a0',
+    fontWeight: '500'
+  },
+  quickActions: {
+    marginBottom: '40px'
+  },
+  sectionTitle: {
+    fontSize: '20px',
+    fontWeight: '600',
+    marginBottom: '20px',
+    color: '#e0e0e0'
+  },
+  actionButtons: {
+    display: 'flex',
+    gap: '16px',
+    flexWrap: 'wrap'
+  },
+  actionButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '14px 24px',
+    backgroundColor: 'rgba(138, 43, 226, 0.2)',
+    color: '#ffffff',
+    border: '1px solid rgba(138, 43, 226, 0.3)',
+    borderRadius: '12px',
+    cursor: 'pointer',
+    fontSize: '15px',
+    fontWeight: '500',
+    transition: 'all 0.3s ease',
+    ':hover': {
+      backgroundColor: 'rgba(138, 43, 226, 0.3)',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 20px rgba(138, 43, 226, 0.3)'
+    }
+  },
+  actionIcon: {
+    fontSize: '18px'
+  },
+  visitorsSection: {
+    marginTop: '20px'
+  },
+  tableContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: '16px',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    overflow: 'hidden',
+    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)'
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: '14px'
+  },
+  tableHeader: {
+    backgroundColor: 'rgba(138, 43, 226, 0.2)'
+  },
+  th: {
+    padding: '16px 20px',
+    textAlign: 'left',
+    fontWeight: '600',
+    color: '#e0e0e0',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+  },
+  tableRow: {
+    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+    transition: 'background-color 0.2s ease',
+    ':hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.05)'
+    }
+  },
+  td: {
+    padding: '16px 20px',
+    color: '#d0d0d0'
+  },
+  ipBadge: {
+    display: 'inline-block',
+    padding: '6px 12px',
+    backgroundColor: 'rgba(138, 43, 226, 0.2)',
+    borderRadius: '6px',
+    fontSize: '13px',
+    fontFamily: 'monospace',
+    color: '#b19cd9'
+  },
+  timeText: {
+    fontSize: '13px',
+    color: '#808080'
+  },
+  visitCount: {
+    display: 'inline-block',
+    padding: '4px 12px',
+    backgroundColor: 'rgba(233, 69, 96, 0.2)',
+    color: '#e94560',
+    borderRadius: '12px',
+    fontSize: '13px',
+    fontWeight: '600'
+  },
+  emptyState: {
+    padding: '60px 20px',
+    textAlign: 'center',
+    color: '#808080'
+  }
+};
 
 export default AdminDashboard;

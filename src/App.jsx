@@ -8,6 +8,7 @@ import DetailPage from './pages/DetailPage';
 import MbtiTestPage from './pages/MbtiTestPage';
 import MbtiHistoryPage from './pages/MbtiHistoryPage';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminFeedbackPage from './pages/AdminFeedbackPage';
 import BaziPage from './pages/BaziPage';
 import BbsPage from './pages/BbsPage';
 import FacePage from './pages/FacePage';
@@ -140,8 +141,14 @@ function App() {
 
           {/* 管理员面板 */}
           <Route
-            path="/admin"
+            path="/admin/dashboard"
             element={<AdminDashboard />}
+          />
+
+          {/* 管理员查看反馈 */}
+          <Route
+            path="/admin/feedback"
+            element={<AdminFeedbackPage />}
           />
 
           {/* 第三级 - 各子分类详情页 */}

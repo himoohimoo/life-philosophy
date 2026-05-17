@@ -2,13 +2,30 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { validatePassword, isAdmin } from '../utils/auth';
+import { recordVisit } from '../data/visitorStats';
+import ContactModal from './ContactModal';
 
 function UserMenu() {
   const { user, isLoggedIn, logout, login, register } = useUser();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+
+  // 记录访问
+  useEffect(() => {
+    const ip = localStorage.getItem('visitor_ip') || generateIP();
+    if (!localStorage.getItem('visitor_ip')) {
+      localStorage.setItem('visitor_ip', ip);
+    }
+    recordVisit(ip, window.location.pathname);
+  }, []);
+
+  // 生成模拟IP
+  function generateIP() {
+    return `192.168.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
+  }
 
   // 点击外部关闭下拉菜单
   useEffect(() => {
@@ -71,9 +88,14 @@ function UserMenu() {
               <span>📋</span> 我的测试记录
             </button>
             {isAdmin(user) && (
-              <button className="dropdown-item" onClick={() => { setShowDropdown(false); navigate('/admin'); }}>
-                <span>🛡️</span> 管理员面板
-              </button>
+              <>
+                <button className="dropdown-item" onClick={() => { setShowDropdown(false); navigate('/admin/dashboard'); }}>
+                  <span>👤</span> 我的
+                </button>
+                <button className="dropdown-item" onClick={() => { setShowDropdown(false); navigate('/admin/feedback'); }}>
+                  <span>📧</span> 查看反馈
+                </button>
+              </>
             )}
             <div className="dropdown-divider"></div>
             <button className="dropdown-item logout" onClick={handleLogout}>
@@ -81,11 +103,39 @@ function UserMenu() {
             </button>
           </div>
         )}
+
+        {/* 联系按钮 - 始终显示 */}
+        <button
+          className="contact-button"
+          onClick={() => setShowContactModal(true)}
+          style={{
+            marginLeft: '10px',
+            padding: '8px 16px',
+            background: 'transparent',
+            border: '1px solid rgba(99, 102, 241, 0.5)',
+            borderRadius: '8px',
+            color: '#a5b4fc',
+            cursor: 'pointer',
+            fontSize: '14px',
+            transition: 'all 0.2s'
+          }}
+        >
+          📧 联系
+        </button>
       </div>
 
       {/* 登录/注册弹窗 */}
       {showAuthModal && (
         <AuthModal onClose={() => setShowAuthModal(false)} login={login} register={register} />
+      )}
+
+      {/* 联系弹窗 */}
+      {showContactModal && (
+        <ContactModal 
+          isOpen={showContactModal} 
+          onClose={() => setShowContactModal(false)} 
+          username={user || '匿名用户'}
+        />
       )}
     </>
   );
